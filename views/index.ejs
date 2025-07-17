@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель управления</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<h1>ТМЦ</h1>
+<form action="/tmc" method="POST">
+  <input type="text" name="name" placeholder="Добавить ТМЦ" required>
+  <button type="submit">Добавить</button>
+</form>
+<ul>
+  <% tmc.forEach(item => { %>
+    <li>
+      <%
+        const match = item.name.match(/(https?:\/\/[^\s]+)/);
+        if (match) {
+          const before = item.name.slice(0, match.index).trim().replace(/[-–—]+$/, '').trim();
+          const url = match[0];
+      %>
+        <b><%= before %></b> —
+        <a href="<%= url %>" target="_blank"><%= url %></a>
+      <% } else { %>
+        <%= item.name %>
+      <% } %>
+
+    </li>
+  <% }) %>
+</ul>
+
+<h1>Ссылки</h1>
+<form action="/link" method="POST">
+  <input type="text" name="label" placeholder="Пояснение" required>
+  <input type="text" name="url" placeholder="Ссылка на папку" required>
+  <button type="submit">Добавить</button>
+</form>
+<ul>
+  <% links.forEach(link => { %>
+    <li>
+      <b><%= link.label %></b> — <%= link.url %>
+      <button class="copy-btn" data-text="<%= link.url %>">Копировать</button>
+      <button class="delete-link" data-id="<%= link.id %>">Удалить</button>
+    </li>
+  <% }) %>
+</ul>
+
+<h1>Добавить подрядчика</h1>
+<form action="/contractor" method="POST">
+  <input type="text" name="group" placeholder="Группа (например, ABB)" required>
+  <input type="email" name="email" placeholder="Email" required>
+  <button type="submit">Добавить</button>
+</form>
+
+<hr>
+
+<% let grouped = {}; contractors.forEach(c => {
+  if (!grouped[c.group_name]) grouped[c.group_name] = [];
+  grouped[c.group_name].push(c);
+}); %>
+
+<% Object.entries(grouped).forEach(([group, members]) => { %>
+  <h2>
+    <%= group %>
+    <button onclick="copyAllInGroup('<%= group %>')">Копировать всех</button>
+  </h2>
+  <ul>
+    <% members.forEach(p => { %>
+      <li>
+        <%= p.email %>
+        <button class="copy-btn" data-text="<%= p.email %>">Копировать</button>
+        <button onclick="deleteContractor('<%= p.email %>', '<%= group %>')">Удалить</button>
+      </li>
+    <% }) %>
+  </ul>
+<% }) %>
+
+<script src="/script.js"></script>
+</body>
+</html>
